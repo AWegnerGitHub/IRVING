@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>{{ results.query_desc }}</title>
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/base.css" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.8.5.custom.css" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery.dataTables.css" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/TableTools.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.8.0.min.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/TableTools.min.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/ZeroClipboard.js" ></script>
+	</head>
+	<body>	
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="datatable">
+	<thead>
+		<tr>
+			{% for h in results.cols %}
+				<th>{{ h }}</th>
+			{% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for r in results.resultset %}
+		<tr>
+			{% for c in r %}
+			<td>{{ c }}</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</tbody>
+	<tfoot>
+		<tr>
+			{% for h in results.cols %}
+				<th>{{ h }}</th>
+			{% endfor %}
+		</tr>
+	</tfoot>
+	</table>
+	<br />
+	<div id="qryparams" class="info">
+	Data Set Parameters:<br />
+	{% for key,value in results.params.items %}
+	{{ key }} => {{ value }} <br />
+	{% endfor %}
+	</div>	
+	
+	<a href="javascript:void(0)" class="queryDisplay">Show/Hide Executed Query</a>
+	<div class="executedQuery">{{ results.query }}
+	<br /><br />
+	{{ results.errorMsg }}</div>
+	
+	
+	<script type="text/javascript" charset="utf-8">
+		$(document).ready(function() {
+			TableTools.DEFAULTS.aButtons = [ "copy", "csv", "xls" ];
+			$('#datatable').dataTable({
+				"sDom": 'T<"clear">lfrtip',
+				"oFeatures": {
+					"bCsv": true,
+					"bXls": true,
+					"bCopy": true,
+					"bPrint": true
+				},
+				"oTableTools": {
+					"sSwfPath": "{{ STATIC_URL }}swf/copy_csv_xls.swf",
+				},
+				"aLengthMenu": [
+					[-1, 10, 25, 50, 100],
+					["All", 10, 25, 50, 100]
+				],
+				"iDisplayLength": 50,
+				"bPaginate": true,
+				"bLengthChange": true,
+				"bFilter": false,
+				"bSort": true,
+				"bInfo": false,
+				"bAutoWidth": false
+			});
+		} );
+	</script>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+				$(".executedQuery").hide();
+				$(".queryDisplay").show();
+			$('.queryDisplay').click(function(){
+			$(".executedQuery").slideToggle();
+			});
+		});
+	</script>
+	
+	</body>
+</html>

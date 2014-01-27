@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% include 'dashgroup.html' %}
+{% block pagetitle %}IRVING - {{ currentDash.board_name }}{% endblock %}
+
+{% block msgArea %}{{ user.first_name }} {{ user.last_name }} [<a href="{% url auth_logout %}">Logout</a>]{% endblock %}
+{% block dashboardname %}{{ currentDash.board_name }}{% endblock %}
+
+{% block currentDash %}{{ currentDash.id }} => {{ currentDash.board_name }}{% endblock %}
+
+{% block dashboards %}
+	<ul id="dashSort">
+	{% for id, value in dashboardGroups.items %}
+		{% include 'dashgroup.html' %}
+	{% endfor %}
+	</ul>
+{% endblock %}
+
+{% block errorpanel %}
+					<div class="dashgroup_container" id="error_panel" desc="System Error Panel">
+						<div class="errorpanel_query">
+							<h1>Error Panel</h1>
+							<ul id="errorSort">
+							{% for qvalue in errorqueries %}
+								{% include 'errorpanel_box.html' %}
+							{% endfor %}
+							</ul>
+						</div>
+					</div>
+{% endblock %}
+
+{% block errorMsg %}{{ errorStr }}{% endblock %}
+
+{% block footer %}
+	<h1>Footer Text here</h1>
+{% endblock %}
+

@@ -1,0 +1,26 @@
+{% block dashboards %}
+	<div class="dashgroup_container" id="dashboard_{{ id.id }}" desc="{{ id.group_desc }}">
+		<div class="dashgroup_body">
+			<li><h1>{{ id.group_desc }}<span class="historybox"><span class="history_days">History Days:<span class="history_days_val">{{ id.history_days }}</span></span></span></h1>
+			<ul id="dashboard_queries_{{ id.id }}">
+			{% for qvalue in value %}
+				{% include 'query_box.html' %}
+			{% endfor %}
+			</ul>
+			</li>
+			<script>
+				$(function() {
+					$( "#dashboard_queries_{{ id.id }}" ).sortable({
+						placeholder: "qry-drag-location",
+						update: function(event, ui) {
+							var dashOrder = $(this).sortable('toArray').toString();
+							saveQueryOrder(dashOrder);
+							}
+						});
+					$( "#dashboard_queries_{{ id.id }}" ).disableSelection();
+				});
+			</script>
+			
+		</div>				
+	</div>
+{% endblock %}

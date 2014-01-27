@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+		<title>{% block pagetitle %}{% endblock %}</title>
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/base.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.8.0.min.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/dashboard_common.js" ></script>
+	</head>
+	<body>
+		<div id="bodyContainer">
+			<div id="msgArea">
+
+			</div>
+			
+			{% block topbar %}
+			<div id="headContainer">
+				<div id="header">
+					<h1>Authorization Required</h1>
+				</div>
+			</div>
+			{% endblock %}
+		</div>	
+			
+	<div id="footContainer">
+		<div id="footer">
+			<h1>Authorization Required</h1>
+		</div>		
+	</div>
+	
+	
+	<script type="text/javascript">
+		positionFooter();
+	</script>
+	</body>
+</html>			

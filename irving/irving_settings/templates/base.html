@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>{% block pagetitle %}{% endblock %}</title>
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/base.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.8.0.min.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/dashboard_common.js" ></script>
+		{% if user.is_authenticated %}
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui-1.8.5.custom.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.ui.core.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.ui.widget.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.ui.mouse.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.ui.sortable.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.ui.dialog.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.ui.position.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jquery.effects.core.js"></script>		
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.ba-dotimeout.min.js" ></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/date.format.js" ></script>
+		<script type="text/javascript">
+			setupAjax();
+		</script>
+		{% endif %}
+	</head>
+	<body>
+		{% if user.is_authenticated %}
+			{% if not user.get_profile.is_displayonly%}
+		<div id="idletimeout">
+			You will be logged off in <span><!-- countdown place holder --></span>&nbsp;seconds due to inactivity. 
+			<a id="idletimeout-resume" href="#">Click here to continue using this web page</a>.
+		</div>
+			{% endif %}
+		{% endif %}
+		<div id="bodyContainer">
+			<div id="msgArea">
+				{% if user.is_authenticated %}
+					<p>Logged in as {% block msgArea %}{% endblock %}</p>
+				{% endif %}
+			</div>
+			
+			{% block topbar %}
+			<div id="headContainer">
+				<div id="header">
+					{% if user.is_authenticated %}
+					<ul>
+						<li id="dashMenuButton"><a onclick="dashboardSelector()" href="javascript:void(0)">Dashboards</a></li>
+					</ul>
+					<h1>{% block dashboardname %}{% endblock %}</h1>
+					{% else %}
+						{% block logincontent %}{% endblock %}
+					{% endif %}
+					
+				</div>
+			</div>
+			{% endblock %}
+			{% if user.is_authenticated %}
+			<div id="dashMenu">
+				<div id="dashMenuRim"></div>
+					<div id="dashMenuView">
+					<ul>
+					{% for dashboard in dashboards %}
+						<li><a href="{{ dashboard.id }}">{{ dashboard.board_name }}</a></li>
+					{% endfor %}
+					</ul>
+				</div>
+			</div>
+			{% if isError %}
+			<div id="errorMsg" class="error">{% block errorMsg %}{% endblock %}</div>	
+			{% endif %}
+			<div id="dashboards">
+				<div id="left_sidebar">
+					{% block dashboards %}{% endblock %}
+				</div>
+				<div id="right_sidebar">
+					{% block errorpanel %}{% endblock %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+		<div id="footContainer">
+			<div id="footer">
+				{% if user.is_authenticated %}
+				<ul>
+					<li id="pollingstatus"><a onclick="startPolling(false)" href="javascript:void(0)">Running</a></li>
+					<li id="pollinginterval"><a onclick="pollingIntervalInfo()" href="javascript:void(0)">Interval: <span id="pollintval">{{ currentDash.refresh_interval }}</span> min.</a></li>
+					<li id="pollinglastupd"><a onclick="pollingUpdateInfo()" href="javascript:void(0)">Last Updated: <span id="pollupdstamp">&nbsp;</span></a></li>
+					<li id="clearoverlays"><a onclick="clearAllOverlays()" href="javascript:void(0)">Clear Overlays</a></li>
+					<li id="dashmanagement"><a href="{% url admin:index %}">Dashboard Management</a></li>
+					<li id="changePassword"><a href="javascript:void(0)">Change Password</a></li>
+				</ul>
+				<div class="apple_overlay" id="dataoverlay">
+					<div class="contentWrap"></div>
+				</div>
+				<script type="text/javascript">
+					startPolling(true, {{ currentDash.refresh_interval }});
+				</script>
+				
+				<script>
+					$(function() {
+						$( "#dashSort" ).sortable({
+							placeholder: "dash-drag-location",
+							update: function(event, ui) {
+								var dashOrder = $(this).sortable('toArray').toString();
+								saveGroupOrder(dashOrder);
+								}
+							});
+						$( "#dashSort" ).disableSelection();
+					});
+					
+					{% if perms.querydata.can_change_querydata %}
+					$(function() {
+						$( "#errorSort" ).sortable({
+							placeholder: "err-drag-location",
+							update: function(event, ui) {
+								var errOrder = $(this).sortable('toArray').toString();
+								saveErrOrder(errOrder);
+								}
+							});
+						$( "#errorSort" ).disableSelection();
+					});
+					{% endif %}
+				</script>
+				{% if not user.get_profile.is_displayonly%}
+				<script src="{{ STATIC_URL }}js/plugins/jquery.idletimer.js" type="text/javascript"></script>
+				<script src="{{ STATIC_URL }}js/plugins/jquery.idletimeout.js" type="text/javascript"></script>
+				<script type="text/javascript">
+				$.idleTimeout('#idletimeout', '#idletimeout a', {
+					idleAfter: {{ session_len }},
+					pollingInterval: {{ session_poll_time }},
+					keepAliveURL: '/extendsession/',
+					serverResponseEquals: '{"success": true}',
+					AJAXTimeout: 500,
+					onTimeout: function(){
+						$(this).slideUp();
+						window.location = "/logout/";
+					},
+					onIdle: function(){
+						$(this).slideDown(); // show the warning bar
+					},
+					onCountdown: function( counter ){
+						$(this).find("span").html( counter ); // update the counter
+					},
+					onResume: function(){
+						$(this).slideUp(); // hide the warning bar
+					}
+				});
+				</script>
+				{% endif %}
+				<script type="text/javascript">
+					passResetDialog();
+				</script>		
+				{% endif %}
+
+				{% block footer %}{% endblock %}
+			</div>		
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		positionFooter();
+	</script>
+	{% if user.is_authenticated %}
+	<div id="passwordchange-main" title="Change Password Dialog">
+		<p class="validateTips">Fill out the form below to change your password</p>
+
+		<form>
+		<fieldset>
+			<label for="oldpass">Old Password</label>
+			<input type="password" name="oldpass" id="oldpass" class="text ui-widget-content ui-corner-all" /><br />
+			<label for="newpass">New Password</label>
+			<input type="password" name="newpass" id="newpass" value="" class="text ui-widget-content ui-corner-all" /><br />
+			<label for="newpass1">New Password Again</label>
+			<input type="password" name="newpass1" id="newpass1" value="" class="text ui-widget-content ui-corner-all" /><br />
+		</fieldset>
+		</form>
+	</div>
+	{% endif %}
+	</body>
+</html>
